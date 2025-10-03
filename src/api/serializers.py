@@ -21,18 +21,18 @@ class RoomSerializer(serializers.ModelSerializer):
 
 class RoomCreateSerializer(serializers.Serializer):
     """Сериализатор для создания комнаты (поддержка двух вариантов поля)"""
-    description = serializers.CharField(required=False, allow_blank=True)
-    text = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(required=False, allow_blank=False)
+    text = serializers.CharField(required=False, allow_blank=False)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     def validate(self, data):
         # Поддержка обоих полей: description или text
         desc = data.get('description') or data.get('text')
-        if not desc:
+        if not desc or desc.strip() == '':
             raise serializers.ValidationError({
-                'description': 'Требуется поле description или text'
+                'description': 'Требуется поле description или text, и оно не должно быть пустым'
             })
-        data['description'] = desc
+        data['description'] = desc.strip()
         return data
 
     def validate_price(self, value):

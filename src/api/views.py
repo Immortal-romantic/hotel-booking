@@ -118,15 +118,15 @@ class BookingCreateView(APIView):
                     {'error': 'room is already booked on given dates'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         # Обработка ошибок валидации
         errors = serializer.errors
-        if 'room_id' in errors:
+        if any('уже забронирована' in str(error) for error in errors.values()):
             return Response(
                 {'error': 'room is already booked on given dates'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         return Response({'error': str(errors)}, status=status.HTTP_400_BAD_REQUEST)
 
 

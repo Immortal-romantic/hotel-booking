@@ -21,7 +21,7 @@ class BookingAPITest(TestCase):
             'date_start': '2023-01-01',
             'date_end': '2023-01-03'
         })
-        
+
         self.assertEqual(resp.status_code, 200)
         body = resp.json()
         self.assertIn('booking_id', body)
@@ -84,24 +84,33 @@ class BookingAPITest(TestCase):
         """Тест получения списка комнат"""
         Room.objects.create(description="Room 1", price=100)
         Room.objects.create(description="Room 2", price=200)
-        
+
         resp = self.client.get('/rooms/list')
-        
+
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(len(data), 2)
+        # Проверяем структуру ответа
+        self.assertIn('room_id', data[0])
+        self.assertIn('description', data[0])
+        self.assertIn('price', data[0])
+        self.assertIn('created_at', data[0])
     
     def test_list_bookings_for_room(self):
         """Тест получения списка бронирований для комнаты"""
         r = Room.objects.create(description="Test room", price=100)
         Booking.objects.create(room=r, date_start='2023-01-01', date_end='2023-01-05')
         Booking.objects.create(room=r, date_start='2023-01-10', date_end='2023-01-15')
-        
+
         resp = self.client.get(f'/bookings/list?room_id={r.id}')
-        
+
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(len(data), 2)
+        # Проверяем структуру ответа
+        self.assertIn('booking_id', data[0])
+        self.assertIn('date_start', data[0])
+        self.assertIn('date_end', data[0])
         self.assertEqual(data[0]['date_start'], '2023-01-01')
     
     def test_delete_booking(self):

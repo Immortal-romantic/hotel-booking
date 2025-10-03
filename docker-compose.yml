@@ -1,14 +1,45 @@
-postgres:
-  image: postgres:15
-  container_name: hotel_booking_postgres
-  volumes:
-    - postgres_data:/var/lib/postgresql/data/
-    - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  environment:
-    - POSTGRES_PASSWORD=postgres
-    - POSTGRES_USER=postgres
-    - POSTGRES_DB=hotel_booking
-  ports:
-    - "5432:5432"
-  restart: unless-stopped
+version: "3.8"
 
+services:
+  db:
+    image: postgres:15
+    container_name: hotel_booking_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hotelbook
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d hotelbook"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: hotel_booking_web
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:9000"
+    volumes:
+      - ./src:/code
+    ports:
+      - "9000:9000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_NAME=hotelbook
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_PORT=5432
+      - DJANGO_DEBUG=True
+      - DJANGO_SECRET_KEY=django-insecure-dev-key-for-docker
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+volumes:
+  postgres_data:

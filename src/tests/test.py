@@ -1,119 +1,128 @@
-# tests.py
-import pytest
-import datetime
-from django.urls import reverse
+from django.test import TestCase
 from rest_framework.test import APIClient
-from rest_framework import status
-from hotel_booking import HotelRoom, Booking
+from api.models import Room, Booking
 
-@pytest.fixture
-def api_client():
-    return APIClient()
 
-@pytest.fixture
-def hotel_room():
-    room = HotelRoom.objects.create(
-        description="Тестовый номер",
-        price_per_night=1000,
-        capacity=2
-    )
-    return room
+class BookingAPITest(TestCase):
+    """Тесты для API бронирования"""
+    
+    def setUp(self):
+        """Настройка перед каждым тестом"""
+        self.client = APIClient()
+    
+    def test_create_room_and_booking(self):
+        """Тест создания комнаты и бронирования"""
+        # Создаём комнату
+        r = Room.objects.create(description="Test room", price=100)
+        
+        # Создаём бронирование
+        resp = self.client.post('/bookings/create', data={
+            'room_id': r.id,
+            'date_start': '2023-01-01',
+            'date_end': '2023-01-03'
+        })
+        
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertIn('booking_id', body)
+        
+        # Проверяем, что бронирование создано
+        b_id = body['booking_id']
+        b = Booking.objects.get(id=b_id)
+        self.assertEqual(b.room.id, r.id)
+        self.assertEqual(str(b.date_start), '2023-01-01')
+        self.assertEqual(str(b.date_end), '2023-01-03')
 
-@pytest.mark.django_db
-class TestHotelRoomAPI:
-    def test_create_hotel_room(self, api_client):
-        url = reverse('hotel_room_create')
-        data = {
-            "description": "Люкс с видом на море",
-            "price_per_night": 5000,
-            "capacity": 2
-        }
+    def test_overlapping_booking_blocked(self):
+        """Тест блокировки пересекающихся бронирований"""
+        # Создаём комнату
+        r = Room.objects.create(description="Test room 2", price=100)
         
-        response = api_client.post(url, data, format='json')
-        assert response.status_code == status.HTTP_201_CREATED
-        assert 'room_id' in response.data
-        assert HotelRoom.objects.count() == 1
-        
-    def test_delete_hotel_room(self, api_client, hotel_room):
-        url = reverse('hotel_room_delete')
-        data = {"room_id": hotel_room.id}
-        
-        response = api_client.post(url, data, format='json')
-        assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert HotelRoom.objects.count() == 0
-        
-    def test_list_hotel_rooms(self, api_client, hotel_room):
-        # Создадим еще один номер для сортировки
-        HotelRoom.objects.create(
-            description="Второй тестовый номер",
-            price_per_night=2000,
-            capacity=3
+        # Создаём первое бронирование
+        b1 = Booking.objects.create(
+            room=r, 
+            date_start='2023-01-10', 
+            date_end='2023-01-15'
         )
         
-        # Тест без параметров сортировки
-        url = reverse('hotel_room_list')
-        response = api_client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
+        # Пытаемся создать пересекающееся бронирование
+        resp = self.client.post('/bookings/create', data={
+            'room_id': r.id,
+            'date_start': '2023-01-12',
+            'date_end': '2023-01-13'
+        })
         
-        # Тест с сортировкой по цене (возрастание)
-        url = f"{reverse('hotel_room_list')}?sort_by=price_per_night&order=asc"
-        response = api_client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 2
-        assert response.data[0]['price_per_night'] < response.data[1]['price_per_night']
-        
-        # Тест с сортировкой по цене (убывание)
-        url = f"{reverse('hotel_room_list')}?sort_by=price_per_night&order=desc"
-        response = api_client.get(url)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data[0]['price_per_night'] > response.data[1]['price_per_night']
-
-@pytest.mark.django_db
-class TestBookingAPI:
-    def test_create_booking(self, api_client, hotel_room):
-        url = reverse('booking_create')
-        today = datetime.date.today()
-        tomorrow = today + datetime.timedelta(days=1)
-        data = {
-            "room_id": hotel_room.id,
-            "guest_name": "Иван Петров",
-            "guest_email": "ivan@example.com",
-            "date_start": today.isoformat(),
-            "date_end": tomorrow.isoformat()
-        }
-        
-        response = api_client.post(url, data, format='json')
-        assert response.status_code == status.HTTP_201_CREATED
-        assert 'booking_id' in response.data
-        assert Booking.objects.count() == 1
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('error', resp.json())
     
-    def test_create_booking_room_not_found(self, api_client):
-        url = reverse('booking_create')
-        today = datetime.date.today()
-        tomorrow = today + datetime.timedelta(days=1)
-        data = {
-            "room_id": 999,  # несуществующий ID
-            "guest_name": "Иван Петров",
-            "guest_email": "ivan@example.com",
-            "date_start": today.isoformat(),
-            "date_end": tomorrow.isoformat()
-        }
+    def test_create_room_via_api(self):
+        """Тест создания комнаты через API"""
+        resp = self.client.post('/rooms/create', data={
+            'description': 'Luxury suite',
+            'price': 250.00
+        })
         
-        response = api_client.post(url, data, format='json')
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertIn('room_id', body)
+        
+        # Проверяем, что комната создана
+        room = Room.objects.get(id=body['room_id'])
+        self.assertEqual(room.description, 'Luxury suite')
+        self.assertEqual(float(room.price), 250.00)
     
-    def test_overlapping_bookings(self, api_client, hotel_room):
-        # Создаем первую бронь
-        today = datetime.date.today()
-        end_date = today + datetime.timedelta(days=5)
+    def test_delete_room(self):
+        """Тест удаления комнаты"""
+        r = Room.objects.create(description="To delete", price=150)
         
-        Booking.objects.create(
-            room=hotel_room,
-            guest_name="Тестовый гость",
-            guest_email="test@example.com",
-            date_start=today,
-            date_end=end_date
-        )
+        resp = self.client.post('/rooms/delete', data={'room_id': r.id})
         
- 
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(Room.objects.filter(id=r.id).exists())
+    
+    def test_list_rooms(self):
+        """Тест получения списка комнат"""
+        Room.objects.create(description="Room 1", price=100)
+        Room.objects.create(description="Room 2", price=200)
+        
+        resp = self.client.get('/rooms/list')
+        
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 2)
+    
+    def test_list_bookings_for_room(self):
+        """Тест получения списка бронирований для комнаты"""
+        r = Room.objects.create(description="Test room", price=100)
+        Booking.objects.create(room=r, date_start='2023-01-01', date_end='2023-01-05')
+        Booking.objects.create(room=r, date_start='2023-01-10', date_end='2023-01-15')
+        
+        resp = self.client.get(f'/bookings/list?room_id={r.id}')
+        
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['date_start'], '2023-01-01')
+    
+    def test_delete_booking(self):
+        """Тест удаления бронирования"""
+        r = Room.objects.create(description="Test room", price=100)
+        b = Booking.objects.create(room=r, date_start='2023-01-01', date_end='2023-01-05')
+        
+        resp = self.client.post('/bookings/delete', data={'booking_id': b.id})
+        
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(Booking.objects.filter(id=b.id).exists())
+    
+    def test_invalid_dates(self):
+        """Тест с некорректными датами"""
+        r = Room.objects.create(description="Test room", price=100)
+        
+        # date_start > date_end
+        resp = self.client.post('/bookings/create', data={
+            'room_id': r.id,
+            'date_start': '2023-01-10',
+            'date_end': '2023-01-05'
+        })
+        
+        self.assertEqual(resp.status_code, 400)

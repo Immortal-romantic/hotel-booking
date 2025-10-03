@@ -1,6 +1,7 @@
-from rest_framework import serializers
 from django.db.models import Q
-from .models import Room, Booking
+from rest_framework import serializers
+
+from .models import Booking, Room
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -48,7 +49,8 @@ class RoomCreateSerializer(serializers.Serializer):
 class BookingSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Booking"""
     booking_id = serializers.IntegerField(source='id', read_only=True)
-    
+    room_id = serializers.IntegerField(source='room.id', read_only=True)
+
     class Meta:
         model = Booking
         fields = ['booking_id', 'room_id', 'date_start', 'date_end', 'created_at']

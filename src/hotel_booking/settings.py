@@ -1,3 +1,7 @@
+import os
+import sys
+from pathlib import Path
+
 """
 Django settings for hotel_booking project.
 
@@ -12,8 +16,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 Django settings for hotel_booking project.
 """
-import os
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,16 +71,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hotel_booking.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DATABASE_NAME', 'hotelbook'),
-        'USER': os.getenv('DATABASE_USER', 'user'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
-        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
-        'PORT': os.getenv('DATABASE_PORT', '5432'),
+# Используем SQLite для разработки и тестов, PostgreSQL только для продакшена
+# Проверяем, запущен ли продакшен сервер или используется PostgreSQL
+USE_POSTGRESQL = os.getenv('USE_POSTGRESQL', 'False').lower() == 'true'
+
+if USE_POSTGRESQL and not ('test' in sys.argv or 'pytest' in sys.argv):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DATABASE_NAME', 'hotelbook'),
+            'USER': os.getenv('DATABASE_USER', 'user'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

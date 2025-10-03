@@ -1,3 +1,6 @@
+from django.contrib import admin
+from django.urls import include, path
+
 """
 URL configuration for hotel_booking project.
 
@@ -17,8 +20,6 @@ Including another URLconf
 """
 URL configuration for hotel_booking project.
 """
-from django.contrib import admin
-from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),

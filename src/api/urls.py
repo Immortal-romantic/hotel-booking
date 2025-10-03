@@ -1,11 +1,12 @@
 from django.urls import path
+
 from .views import (
-    RoomCreateView, 
-    RoomDeleteView, 
+    BookingCreateView,
+    BookingDeleteView,
+    BookingListView,
+    RoomCreateView,
+    RoomDeleteView,
     RoomListView,
-    BookingCreateView, 
-    BookingDeleteView, 
-    BookingListView
 )
 
 app_name = 'api'

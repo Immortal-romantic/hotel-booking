@@ -1,15 +1,15 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Room, Booking
+from .models import Booking, Room
 from .serializers import (
-    RoomSerializer, 
+    BookingListSerializer,
+    BookingSerializer,
     RoomCreateSerializer,
-    BookingSerializer, 
-    BookingListSerializer
+    RoomSerializer,
 )
 
 
@@ -42,11 +42,11 @@ class RoomDeleteView(APIView):
 class RoomListView(APIView):
     """Список комнат с сортировкой"""
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         sort_by = request.query_params.get('sort_by', 'id')
         order = request.query_params.get('order', 'asc')
-        
+
         # Маппинг полей для сортировки
         sort_field_map = {
             'price': 'price',
@@ -54,25 +54,15 @@ class RoomListView(APIView):
             'created_at': 'created_at',
             'id': 'id'
         }
-        
+
         field = sort_field_map.get(sort_by, 'id')
-        
+
         if order == 'desc':
             field = f'-{field}'
-        
+
         rooms = Room.objects.all().order_by(field)
-        
-        # Ручная сериализация для соответствия формату из тестов
-        data = []
-        for room in rooms:
-            data.append({
-                'room_id': room.id,
-                'description': room.description,
-                'price': str(room.price),
-                'created_at': room.created_at.isoformat()
-            })
-        
-        return Response(data, status=status.HTTP_200_OK)
+        serializer = RoomSerializer(rooms, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BookingCreateView(APIView):
@@ -113,7 +103,7 @@ class BookingCreateView(APIView):
             try:
                 booking = serializer.save()
                 return Response({'booking_id': booking.id}, status=status.HTTP_200_OK)
-            except Exception as e:
+            except Exception:
                 return Response(
                     {'error': 'room is already booked on given dates'},
                     status=status.HTTP_400_BAD_REQUEST

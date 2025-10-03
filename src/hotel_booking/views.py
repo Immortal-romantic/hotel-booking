@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+
 def rooms_create(request):
     return JsonResponse({"message": "room created (stub)"})
 
@@ -16,5 +17,5 @@ def bookings_delete(request):
     return JsonResponse({"message": "booking deleted (stub)"})
 
 def bookings_list(request):
-    return JsonResponse([{"booking_id": 1, "date_start": "2025-10-03", "date_end": "2025-10-05"}], safe=False)
-
+    data = [{"booking_id": 1, "date_start": "2025-10-03", "date_end": "2025-10-05"}]
+    return JsonResponse(data, safe=False)

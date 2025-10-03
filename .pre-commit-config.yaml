@@ -1,16 +1,39 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
-    -   id: debug-statements
-
--   repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff для линтинга и форматирования
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
     hooks:
-    -   id: ruff
+      # Запуск линтера
+      - id: ruff
         args: [--fix]
-    -   id: ruff-format
+      # Форматирование кода
+      - id: ruff-format
+
+  # Проверка типов (если используется mypy)
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.7.1
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-all]
+
+  # Проверка уязвимостей в зависимостях
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+
+  # Проверка на наличие секретов
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'tests/'
+
+  # Проверка орфографии в документации
+  # - repo: https://github.com/codespell-project/codespell
+  #   rev: v2.2.6
+  #   hooks:
+  #     - id: codespell
+  #       args: [--skip="*.pdf,*.svg,*.lock,poetry.lock,*.toml"]
+  #       exclude: 'tests/'

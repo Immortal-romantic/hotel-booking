@@ -13,6 +13,7 @@ app_name = 'api'
 
 urlpatterns = [
     # Room endpoints
+    
     path('rooms/create', RoomCreateView.as_view(), name='room_create'),
     path('rooms/delete', RoomDeleteView.as_view(), name='room_delete'),
     path('rooms/list', RoomListView.as_view(), name='room_list'),

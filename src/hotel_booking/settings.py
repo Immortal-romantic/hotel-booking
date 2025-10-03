@@ -2,6 +2,8 @@ import os
 import sys
 from pathlib import Path
 
+from .config import get_database_config
+
 """
 Django settings for hotel_booking project.
 
@@ -72,19 +74,11 @@ WSGI_APPLICATION = 'hotel_booking.wsgi.application'
 
 # Database
 # Используем SQLite для разработки и тестов, PostgreSQL только для продакшена
-# Проверяем, запущен ли продакшен сервер или используется PostgreSQL
 USE_POSTGRESQL = os.getenv('USE_POSTGRESQL', 'False').lower() == 'true'
 
 if USE_POSTGRESQL and not ('test' in sys.argv or 'pytest' in sys.argv):
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DATABASE_NAME', 'hotelbook'),
-            'USER': os.getenv('DATABASE_USER', 'user'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
-            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
-            'PORT': os.getenv('DATABASE_PORT', '5432'),
-        }
+        'default': get_database_config()
     }
 else:
     DATABASES = {

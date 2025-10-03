@@ -1,12 +1,25 @@
-echo database: > config.yaml
-echo   name: hotel_booking >> config.yaml
-echo   user: postgres >> config.yaml
-echo   password: postgres >> config.yaml
-echo   host: localhost >> config.yaml
-echo   port: 5432 >> config.yaml
-echo django: >> config.yaml
-echo   secret_key: django-insecure-dev-key-change-in-production >> config.yaml
-echo   debug: true >> config.yaml
-echo   allowed_hosts: >> config.yaml
-echo     - localhost >> config.yaml
-echo     - 127.0.0.1 >> config.yaml
+# Hotel Booking API Configuration
+
+# Database settings
+database:
+  name: "hotel_booking"
+  user: "postgres"
+  password: "postgres"
+  host: "localhost"
+  port: 5433
+
+# Django settings
+django:
+  debug: true
+  secret_key: "your-secret-key-change-in-production"
+  allowed_hosts: ["*"]
+
+# API settings
+api:
+  max_page_size: 100
+  default_page_size: 20
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -44,3 +44,22 @@ ENV/
 
 # Project specific
 config.yaml
+config.yaml.bak
+.secrets.baseline
+bandit-report.json
+coverage.xml
+.coverage
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pre-commit
+.pre-commit-config.yaml.backup
+
+# IDE (дополнительно)
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

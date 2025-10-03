@@ -1,20 +1,22 @@
-FROM python:3.10-slim
+FROM python:3.11
 
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /code
 
 # Установка poetry
-RUN pip install poetry==1.6.1
+RUN pip install poetry
 
-# Копирование файлов проекта
-COPY pyproject.toml poetry.lock* /app/
+# Копирование файлов с зависимостями
+COPY pyproject.toml poetry.lock* /code/
 
-# Настройка poetry для создания virtualenv в проекте
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+# Настройка poetry для установки в системный Python
+RUN poetry config virtualenvs.create false
 
-# Копирование исходного кода
-COPY src /app/src
-COPY config.yaml /app/
+# Установка зависимостей без установки текущего проекта
+RUN poetry install --no-interaction --no-ansi --no-root
 
-# Команда запуска
-CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"]
+# Копирование только кода приложения
+COPY src /code/
+

@@ -12,6 +12,7 @@ django = "^5.2.7"
 djangorestframework = "^3.16.1"
 psycopg2-binary = "^2.9.10"
 pydantic = "^2.11.9"
+pydantic-settings = "^2.1.0"
 pyyaml = "^6.0.3"
 
 [tool.poetry.group.dev.dependencies]
@@ -52,5 +53,6 @@ known-third-party = ["django", "rest_framework"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "hotel_booking.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-testpaths = ["src", "tests"]
+testpaths = ["src"]
 pythonpath = ["src"]
+addopts = "-v"

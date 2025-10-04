@@ -53,6 +53,6 @@ known-third-party = ["django", "rest_framework"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "hotel_booking.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-testpaths = ["src"]
+testpaths = ["src/tests"]
 pythonpath = ["src"]
 addopts = "-v"

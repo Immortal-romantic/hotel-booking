@@ -4,18 +4,15 @@ from django.db import models
 
 class Room(models.Model):
     """Модель комнаты отеля"""
+
     description = models.TextField(verbose_name="Описание")
-    price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        verbose_name="Цена за ночь"
-    )
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена за ночь")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
         verbose_name = "Комната"
         verbose_name_plural = "Комнаты"
-        ordering = ['id']
+        ordering = ["id"]
 
     def __str__(self):
         return f"Room {self.id} - {self.description[:30]}"
@@ -23,11 +20,9 @@ class Room(models.Model):
 
 class Booking(models.Model):
     """Модель бронирования"""
+
     room = models.ForeignKey(
-        Room, 
-        related_name='bookings', 
-        on_delete=models.CASCADE,
-        verbose_name="Комната"
+        Room, related_name="bookings", on_delete=models.CASCADE, verbose_name="Комната"
     )
     date_start = models.DateField(verbose_name="Дата начала")
     date_end = models.DateField(verbose_name="Дата окончания")
@@ -36,9 +31,9 @@ class Booking(models.Model):
     class Meta:
         verbose_name = "Бронирование"
         verbose_name_plural = "Бронирования"
-        ordering = ['date_start']
+        ordering = ["date_start"]
         indexes = [
-            models.Index(fields=['room', 'date_start', 'date_end']),
+            models.Index(fields=["room", "date_start", "date_end"]),
         ]
 
     def __str__(self):

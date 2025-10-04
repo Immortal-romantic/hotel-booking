@@ -25,29 +25,31 @@ URL configuration for hotel_booking project.
 
 def api_overview(request):
     """Обзор доступных API эндпоинтов"""
-    return JsonResponse({
-        "name": "Hotel Booking API",
-        "version": "1.0.0",
-        "description": "API для управления номерами отелей и бронированиями",
-        "endpoints": {
-            "rooms": {
-                "create": "POST /rooms/create",
-                "delete": "POST /rooms/delete",
-                "list": "GET /rooms/list"
+    return JsonResponse(
+        {
+            "name": "Hotel Booking API",
+            "version": "1.0.0",
+            "description": "API для управления номерами отелей и бронированиями",
+            "endpoints": {
+                "rooms": {
+                    "create": "POST /rooms/create",
+                    "delete": "POST /rooms/delete",
+                    "list": "GET /rooms/list",
+                },
+                "bookings": {
+                    "create": "POST /bookings/create",
+                    "delete": "POST /bookings/delete",
+                    "list": "GET /bookings/list",
+                },
             },
-            "bookings": {
-                "create": "POST /bookings/create",
-                "delete": "POST /bookings/delete",
-                "list": "GET /bookings/list"
-            }
-        },
-        "documentation": "/README.md",
-        "github": "https://github.com/your-repo/hotel-booking"
-    })
+            "documentation": "/README.md",
+            "github": "https://github.com/your-repo/hotel-booking",
+        }
+    )
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', api_overview, name='api_overview'),  # Корневой путь с информацией об API
-    path('api/', include('api.urls')),  # API эндпоинты под /api/
+    path("admin/", admin.site.urls),
+    path("", api_overview, name="api_overview"),  # Корневой путь с информацией об API
+    path("api/", include("api.urls")),  # API эндпоинты под /api/
 ]

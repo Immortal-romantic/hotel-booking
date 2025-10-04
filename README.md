@@ -49,7 +49,7 @@ docker-compose up --build
 
 #### Создать номер
 ```http
-POST /rooms/create
+POST /api/rooms/create
 Content-Type: application/json
 
 {
@@ -67,7 +67,7 @@ Content-Type: application/json
 
 #### Удалить номер
 ```http
-POST /rooms/delete
+POST /api/rooms/delete
 Content-Type: application/json
 
 {
@@ -84,7 +84,7 @@ Content-Type: application/json
 
 #### Получить список номеров
 ```http
-GET /rooms/list?sort_by=price&order=asc
+GET /api/rooms/list?sort_by=price&order=asc
 ```
 
 **Параметры запроса:**
@@ -107,7 +107,7 @@ GET /rooms/list?sort_by=price&order=asc
 
 #### Создать бронь
 ```http
-POST /bookings/create
+POST /api/bookings/create
 Content-Type: application/json
 
 {
@@ -126,7 +126,7 @@ Content-Type: application/json
 
 #### Удалить бронь
 ```http
-POST /bookings/delete
+POST /api/bookings/delete
 Content-Type: application/json
 
 {
@@ -143,7 +143,7 @@ Content-Type: application/json
 
 #### Получить список броней номера
 ```http
-GET /bookings/list?room_id=1
+GET /api/bookings/list?room_id=1
 ```
 
 **Ответ:**
@@ -286,20 +286,20 @@ export DATABASE_PORT=5432
 
 ```bash
 # Создать номер отеля
-curl -X POST http://localhost:8000/rooms/create \
+curl -X POST http://localhost:8000/api/rooms/create \
   -H "Content-Type: application/json" \
   -d '{"description": "Стандартный номер", "price": 100.00}'
 
 # Создать бронь
-curl -X POST http://localhost:8000/bookings/create \
+curl -X POST http://localhost:8000/api/bookings/create \
   -H "Content-Type: application/json" \
   -d '{"room_id": 1, "date_start": "2023-12-25", "date_end": "2023-12-27"}'
 
 # Получить список номеров
-curl -X GET "http://localhost:8000/rooms/list?sort_by=price&order=asc"
+curl -X GET "http://localhost:8000/api/rooms/list?sort_by=price&order=asc"
 
 # Получить брони номера
-curl -X GET "http://localhost:8000/bookings/list?room_id=1"
+curl -X GET "http://localhost:8000/api/bookings/list?room_id=1"
 ```
 
 ### Python примеры
@@ -310,14 +310,14 @@ import requests
 base_url = "http://localhost:8000"
 
 # Создать номер
-response = requests.post(f"{base_url}/rooms/create", json={
+response = requests.post(f"{base_url}/api/rooms/create", json={
     "description": "Президентский люкс",
     "price": 500.00
 })
 room_id = response.json()["room_id"]
 
 # Создать бронь
-response = requests.post(f"{base_url}/bookings/create", json={
+response = requests.post(f"{base_url}/api/bookings/create", json={
     "room_id": room_id,
     "date_start": "2023-12-25",
     "date_end": "2023-12-27"

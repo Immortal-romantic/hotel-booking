@@ -14,7 +14,7 @@ class BookingAPITest(TestCase):
     def test_create_room_and_booking(self):
         """Тест создания комнаты и бронирования"""
         # Создаём комнату через API
-        resp = self.client.post('/rooms/create', data={
+        resp = self.client.post('/api/rooms/create', data={
             'description': 'Test room',
             'price': 100.00
         })
@@ -38,7 +38,7 @@ class BookingAPITest(TestCase):
     def test_create_booking_via_api(self):
         """Тест создания бронирования через API"""
         # Создаём комнату через API
-        resp = self.client.post('/rooms/create', data={
+        resp = self.client.post('/api/rooms/create', data={
             'description': 'Test room for booking',
             'price': 150.00
         })
@@ -72,7 +72,7 @@ class BookingAPITest(TestCase):
         )
         
         # Пытаемся создать пересекающееся бронирование
-        resp = self.client.post('/bookings/create', data={
+        resp = self.client.post('/api/bookings/create', data={
             'room_id': r.id,
             'date_start': '2023-01-12',
             'date_end': '2023-01-13'
@@ -83,9 +83,9 @@ class BookingAPITest(TestCase):
     
     def test_create_room_via_api(self):
         """Тест создания комнаты через API"""
-        resp = self.client.post('/rooms/create', data={
-            'description': 'Luxury suite',
-            'price': 250.00
+        resp = self.client.post('/api/rooms/create', data={
+            'description': 'Test room for booking',
+            'price': 150.00
         })
         
         self.assertEqual(resp.status_code, 200)
@@ -94,14 +94,14 @@ class BookingAPITest(TestCase):
         
         # Проверяем, что комната создана
         room = Room.objects.get(id=body['room_id'])
-        self.assertEqual(room.description, 'Luxury suite')
-        self.assertEqual(float(room.price), 250.00)
+        self.assertEqual(room.description, 'Test room for booking')
+        self.assertEqual(float(room.price), 150.00)
     
     def test_delete_room(self):
         """Тест удаления комнаты"""
         r = Room.objects.create(description="To delete", price=150)
         
-        resp = self.client.post('/rooms/delete', data={'room_id': r.id})
+        resp = self.client.post('/api/rooms/delete', data={'room_id': r.id})
         
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Room.objects.filter(id=r.id).exists())
@@ -111,7 +111,7 @@ class BookingAPITest(TestCase):
         Room.objects.create(description="Room 1", price=100)
         Room.objects.create(description="Room 2", price=200)
 
-        resp = self.client.get('/rooms/list')
+        resp = self.client.get('/api/rooms/list')
 
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
@@ -128,7 +128,7 @@ class BookingAPITest(TestCase):
         Booking.objects.create(room=r, date_start='2023-01-01', date_end='2023-01-05')
         Booking.objects.create(room=r, date_start='2023-01-10', date_end='2023-01-15')
 
-        resp = self.client.get(f'/bookings/list?room_id={r.id}')
+        resp = self.client.get(f'/api/bookings/list?room_id={r.id}')
 
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
@@ -144,7 +144,7 @@ class BookingAPITest(TestCase):
         r = Room.objects.create(description="Test room", price=100)
         b = Booking.objects.create(room=r, date_start='2023-01-01', date_end='2023-01-05')
         
-        resp = self.client.post('/bookings/delete', data={'booking_id': b.id})
+        resp = self.client.post('/api/bookings/delete', data={'booking_id': b.id})
         
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Booking.objects.filter(id=b.id).exists())
@@ -154,7 +154,7 @@ class BookingAPITest(TestCase):
         r = Room.objects.create(description="Test room", price=100)
         
         # date_start > date_end
-        resp = self.client.post('/bookings/create', data={
+        resp = self.client.post('/api/bookings/create', data={
             'room_id': r.id,
             'date_start': '2023-01-10',
             'date_end': '2023-01-05'

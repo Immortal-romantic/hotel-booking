@@ -58,3 +58,4 @@ python_functions = ["test_*"]
 testpaths = ["src/tests"]
 pythonpath = ["src"]
 addopts = "-v --tb=short"
+norecursedirs = ["__pycache__", ".pytest_cache", "node_modules"]

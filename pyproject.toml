@@ -55,6 +55,6 @@ DJANGO_SETTINGS_MODULE = "hotel_booking.settings"
 python_files = ["test_*.py", "*_test.py", "tests.py"]
 python_classes = ["*Test*"]
 python_functions = ["test_*"]
-testpaths = ["src"]
+testpaths = ["src/tests"]
 pythonpath = ["src"]
 addopts = "-v --tb=short"
